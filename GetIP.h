@@ -10,6 +10,7 @@
 
 @interface GetIP: NSObject {}
 
-+(NSString *) getIP;
++(NSString *) getExternalIP;
++(NSArray *) getLocalIPs;
 
 @end

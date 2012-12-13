@@ -23,24 +23,18 @@
 }
 
 -(void) awakeFromNib {
-	statusItem=[[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
+	statusItem = [[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
 	[statusItem setMenu:menu];
 
 	[statusItem setHighlightMode:YES];
 	[statusItem setTitle:@"IP"];
 	[statusItem setEnabled:YES];
 
-    NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:@"Test" action:@selector(copy:) keyEquivalent:@""];
-    [testItem setTarget:self];
-    [testItem setEnabled:true];
-    [menu addItem:testItem];
-    [testItem release];
+    [menu insertItem:[NSMenuItem separatorItem] atIndex:0];
 
-
-	timer=[NSTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(update) userInfo:nil repeats:YES];
+	timer = [NSTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(update) userInfo:nil repeats:YES];
 	[timer fire];
 }
-
 
 -(void) copy:(NSMenuItem*)target {
     [[NSPasteboard generalPasteboard] clearContents];
@@ -48,56 +42,43 @@
 }
 
 -(void) update {
-	
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath: @"/bin/sh"];
-    
-    NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: @"-c",
-                 @"ifconfig |grep 'inet ' | grep -v 127", nil];
-    [task setArguments: arguments];
-    
-    NSPipe *pipe = [NSPipe pipe];
-    [task setStandardOutput: pipe];
-    
-    NSFileHandle *file = [pipe fileHandleForReading];
-    
-    [task launch];
-    
-    NSData *data;
-    data = [file readDataToEndOfFile];
-    
-    NSString *output = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    
-    NSArray *lines = [output componentsSeparatedByString:@"\n"];
-    for (int i=0; i < [lines count]; i++) {
-        NSString *line = [lines objectAtIndex:i];
-        line = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        
-        if ([line length] != 0) {
-            NSArray *parts = [line componentsSeparatedByString:@" "];
-            NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[parts objectAtIndex:1]
-                                                              action:@selector(copy:)
-                                                       keyEquivalent:@""];
-            [testItem setTarget:self];
-            [testItem setEnabled:YES];
-            [menu addItem:testItem];
-            [testItem release];
-        }
-
-    }
-    
-    [output release];
-    [task release];
+	[self refresh:nil];
 }
 
 -(IBAction) refresh: (id) sender {
     
-	[self update];
+    int originalItemCount = 5;
+    int itemCount = [menu numberOfItems] - originalItemCount;
+    
+    NSLog(@"itemcount = %i", itemCount);
+    
+    for (int j = itemCount; j > 0; j--) {
+        [menu removeItemAtIndex:0];
+    }
+    
+    NSString *externalIp = [GetIP getExternalIP];
+    NSMutableArray *ips = [[NSMutableArray alloc] initWithObjects:externalIp, nil];
+    
+    [ips addObjectsFromArray:[GetIP getLocalIPs]];
+    
+    int count = [ips count];
+    
+    NSLog(@" isp count = %i", count);
+    for(int i = 0; i < [ips count]; i++) {
+        NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[ips objectAtIndex:i]
+                                                      action:@selector(copy:)
+                                               keyEquivalent:@""];
+        [testItem setTarget:self];
+        [testItem setEnabled:YES];
+    
+        [menu insertItem: testItem atIndex:i];
+        [testItem release];
+    }
+    
 }
 
 -(IBAction) about: (id) sender {
-	NSApplication *app=[NSApplication sharedApplication];
+	NSApplication *app = [NSApplication sharedApplication];
 	[app activateIgnoringOtherApps:YES];
 	[app orderFrontStandardAboutPanel:NULL];
 }
