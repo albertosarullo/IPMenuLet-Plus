@@ -76,16 +76,26 @@
     NSData *data;
     data = [file readDataToEndOfFile];
     
-    NSString *string = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    NSLog (@"grep returned:\n%@", string);
+    NSString *output = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+    NSLog (@"grep returned:\n%@", output);
     
     
-    NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:string action:NULL keyEquivalent:@""];
-    [testItem setEnabled:YES];
-    [menu addItem:testItem];
+    NSArray *lines = [output componentsSeparatedByString:@"\n"];
+    for (int i=0; i < [lines count]; i++) {
+        NSString *line = [lines objectAtIndex:i];
+        line = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+        if ([line length] != 0) {
+            NSArray *parts = [line componentsSeparatedByString:@" "];
+            NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[parts objectAtIndex:1] action:NULL keyEquivalent:@""];
+            [testItem setEnabled:YES];
+            [menu addItem:testItem];
+        }
 
+
+    }
     
-    [string release];
+    [output release];
     [task release];
 }
 
