@@ -29,10 +29,12 @@
 	[statusItem setHighlightMode:YES];
 	[statusItem setTitle:@"IP"];
 	[statusItem setEnabled:YES];
-    
 
-    NSStatusItem *statusItem2=[[[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength] retain];
-	[statusItem2 setMenu:menu];
+    NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:@"Test" action:@selector(copy:) keyEquivalent:@""];
+    [testItem setTarget:self];
+    [testItem setEnabled:true];
+    [menu addItem:testItem];
+    [testItem release];
 
 
 	timer=[NSTimer scheduledTimerWithTimeInterval:300 target:self selector:@selector(update) userInfo:nil repeats:YES];
@@ -40,25 +42,14 @@
 }
 
 
+-(void) copy:(NSMenuItem*)target {
+    [[NSPasteboard generalPasteboard] clearContents];
+    [[NSPasteboard generalPasteboard] setString:target.title forType:NSStringPboardType];
+}
+
 -(void) update {
-	// [statusItem setTitle:[GetIP getIP]];
-    // /usr/bin/grep foo bar.txt'
-    
-    /*
-    NSTask *task;
-    task = [[NSTask alloc] init];
-    [task setLaunchPath: @"/sbin/ifconfig |grep 'inet '"];
-    
-    // ifconfig |grep "inet " | grep -v 127
-    
-    NSArray *arguments;
-    arguments = [NSArray arrayWithObjects: @"|grep 'inet '", nil];
-    // [task setArguments: arguments];
-    */
-    
-    
-    NSTask *task;
-    task = [[NSTask alloc] init];
+	
+    NSTask *task = [[NSTask alloc] init];
     [task setLaunchPath: @"/bin/sh"];
     
     NSArray *arguments;
@@ -77,8 +68,6 @@
     data = [file readDataToEndOfFile];
     
     NSString *output = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-    NSLog (@"grep returned:\n%@", output);
-    
     
     NSArray *lines = [output componentsSeparatedByString:@"\n"];
     for (int i=0; i < [lines count]; i++) {
@@ -87,11 +76,14 @@
         
         if ([line length] != 0) {
             NSArray *parts = [line componentsSeparatedByString:@" "];
-            NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[parts objectAtIndex:1] action:NULL keyEquivalent:@""];
+            NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[parts objectAtIndex:1]
+                                                              action:@selector(copy:)
+                                                       keyEquivalent:@""];
+            [testItem setTarget:self];
             [testItem setEnabled:YES];
             [menu addItem:testItem];
+            [testItem release];
         }
-
 
     }
     

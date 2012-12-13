@@ -18,6 +18,7 @@
 }
 
 -(void) update;
+-(void) copy:(id)argument;
 
 -(IBAction) refresh: (id) sender;
 -(IBAction) about: (id) sender;
