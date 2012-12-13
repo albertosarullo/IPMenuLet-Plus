@@ -50,8 +50,6 @@
     int originalItemCount = 5;
     int itemCount = [menu numberOfItems] - originalItemCount;
     
-    NSLog(@"itemcount = %i", itemCount);
-    
     for (int j = itemCount; j > 0; j--) {
         [menu removeItemAtIndex:0];
     }
@@ -61,9 +59,6 @@
     
     [ips addObjectsFromArray:[GetIP getLocalIPs]];
     
-    int count = [ips count];
-    
-    NSLog(@" isp count = %i", count);
     for(int i = 0; i < [ips count]; i++) {
         NSMenuItem *testItem = [[NSMenuItem alloc] initWithTitle:[ips objectAtIndex:i]
                                                       action:@selector(copy:)
