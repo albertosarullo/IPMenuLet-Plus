@@ -37,8 +37,10 @@
 }
 
 -(void) copy:(NSMenuItem*)target {
+     NSArray *ip = [target.title componentsSeparatedByString:@" "];
+    
     [[NSPasteboard generalPasteboard] clearContents];
-    [[NSPasteboard generalPasteboard] setString:target.title forType:NSStringPboardType];
+    [[NSPasteboard generalPasteboard] setString:[ip objectAtIndex:0] forType:NSStringPboardType];
 }
 
 -(void) update {

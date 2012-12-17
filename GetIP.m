@@ -20,8 +20,8 @@
 	if (error) {
 		return @"?.?.?.?";
 	}
-
-	return [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+    NSString *ip = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+	return [NSString stringWithFormat:@"%@ [external]", ip];
 }
 
 +(NSArray *) getLocalIPs {
